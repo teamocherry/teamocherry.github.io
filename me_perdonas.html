@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="me_perdonas.css">
+</head>
+<body>
+  <div id="app">
+  <div class="hearts-bg" id="heartsBg"></div>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="card" id="mainCard">
+    <span class="emoji-big">🥺</span>
+    <h1>¿Me perdonas?</h1>
+    <p class="subtitle">Lo siento mucho de verdad...</p>
+
+    <div id="btnRow">
+      <button class="btn-si" id="btnSi" onclick="handleSi()">Sí 💖</button>
+      <div style="height:20px"></div>
+      <button class="btn-no" id="btnNo" onclick="handleNo()">No 😤</button>
+    </div>
+
+    <div class="success-msg" id="successMsg">
+      <span style="font-size:56px;">🌷</span>
+      <p class="success-text" id="successText">Perdon, se que cometi errores, se que te lastimé, hice estupideces
+      y no tengo excusa, solo quiero que sepas que te amo con todo mi corazón y que haré lo que sea para enmendar 
+      mis errores y hacerte feliz, por favor perdóname, te amo mucho y no quiero perderte, y sé que voy a tener
+      que demostrarlo con acciones, y lo haré, te lo prometo, solo dame la oportunidad de demostrarte que puedo 
+      ser mejor, que puedo hacerte feliz, que puedo amarte como te mereces, por favor perdóname, te amo con todo mi corazón 
+      y no quiero perderte, eres lo más importante para mí y haré lo que sea para hacerte feliz, solo dame la oportunidad de 
+      demostrarlo, te amo mucho y no quiero perderte, por favor perdóname, te amo con todo mi corazón. 
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const heartsBg = document.getElementById('heartsBg');
+  for (let i = 0; i < 12; i++) {
+    const h = document.createElement('div');
+    h.className = 'float-heart';
+    h.textContent = ['💕','💗','💓','❤️','🩷'][Math.floor(Math.random()*5)];
+    h.style.left = Math.random() * 100 + '%';
+    h.style.animationDelay = Math.random() * 6 + 's';
+    h.style.animationDuration = (4 + Math.random() * 4) + 's';
+    h.style.fontSize = (14 + Math.random() * 16) + 'px';
+    heartsBg.appendChild(h);
+  }
+
+  const btnNo = document.getElementById('btnNo');
+  let noCount = 0;
+  let hasEscaped = false;
+
+  const noLabels = ['Lero lero no puede 😝','No 😤', '¡Espera! 🙈', '¡No! 😭', 'Nunca 😡', '¡Auxilio! 🏃'];
+
+  function escapeToRandom() {
+    const bw = btnNo.offsetWidth || 130;
+    const bh = btnNo.offsetHeight || 52;
+    const margin = 10;
+    const x = margin + Math.random() * (window.innerWidth - bw - margin * 2);
+    const y = margin + Math.random() * (window.innerHeight - bh - margin * 2);
+    btnNo.style.left = x + 'px';
+    btnNo.style.top = y + 'px';
+  }
+
+  function handleNo() {
+    if (!hasEscaped) {
+      hasEscaped = true;
+      btnNo.classList.add('floating');
+      escapeToRandom();
+    } else {
+      noCount++;
+      btnNo.textContent = noLabels[Math.min(noCount, noLabels.length - 1)];
+      escapeToRandom();
+    }
+  }
+
+  btnNo.addEventListener('mouseover', () => {
+    if (hasEscaped) escapeToRandom();
+  });
+
+  btnNo.addEventListener('touchstart', (e) => {
+    if (hasEscaped) { e.preventDefault(); escapeToRandom(); }
+  }, { passive: false });
+
+  function handleSi() {
+    btnNo.style.display = 'none';
+    document.getElementById('btnRow').style.display = 'none';
+    const msg = document.getElementById('successMsg');
+    msg.classList.add('show');
+    launchConfetti();
+  }
+
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const colors = ['#e8375f','#ff90a8','#ffb6c1','#c0325a','#ff4081','#fff','#ffd6e0','#ff69b4'];
+    const pieces = Array.from({length: 180}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * -canvas.height,
+      r: 5 + Math.random() * 8,
+      d: 1.5 + Math.random() * 2.5,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltSpeed: 0.1 + Math.random() * 0.1,
+      shape: Math.random() > 0.5 ? 'circle' : 'rect',
+      angle: Math.random() * Math.PI * 2
+    }));
+    let frame = 0;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.fillStyle = p.color;
+        if (p.shape === 'circle') {
+          ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+        } else {
+          ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+        }
+        ctx.restore();
+        p.y += p.d; p.angle += 0.04;
+        p.x += Math.sin(p.tilt) * 1.2; p.tilt += p.tiltSpeed;
+        if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+      });
+      frame++;
+      if (frame < 350) requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    draw();
+  }
+</script>
+
+</body>
+</html>
